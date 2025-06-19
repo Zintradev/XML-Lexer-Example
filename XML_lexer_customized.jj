@@ -1,0 +1,115 @@
+options {
+  JDK_VERSION = "1.5";
+  static = true;
+  IGNORE_CASE = false;
+  // DEBUG_TOKEN_MANAGER = true;
+  GRAMMAR_ENCODING = "UTF-8";
+  LOOKAHEAD = 1;
+}
+
+PARSER_BEGIN(XML_lexer)
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class XML_lexer {
+
+  public static void main(String[] args) {
+    FileInputStream myfile = null;
+    XML_lexer lexer = null;
+    int option = 0;
+    try {
+      InputStreamReader isr = new InputStreamReader(System.in);
+      BufferedReader bf = new BufferedReader(isr);
+      System.out.println("Configuración de código fuente a analizar:");
+      System.out.println("\t[1] Lectura por teclado");
+      System.out.println("\t[2] Lectura desde fichero");
+
+      option = Integer.parseInt(bf.readLine());
+      if (option == 1) {
+        System.out.println("Configurada lectura por teclado. Introduce el código fuente:");
+        lexer = new XML_lexer(System.in);
+      } else if (option == 2) {
+        System.out.println("Introduce el nombre del fichero fuente:");
+        myfile = new FileInputStream(bf.readLine());
+        lexer = new XML_lexer(myfile);
+      }
+    } catch (Exception e1) {
+      e1.printStackTrace();
+      System.exit(1);
+    }
+
+    while (true) {
+      try {
+        Token myToken = lexer.getNextToken();
+        if (myToken.kind == XML_lexerConstants.EOF) {
+          System.out.println("Leído final del fichero.");
+          System.exit(0);
+        }
+        System.out.println("Leído lexema: " + myToken.image + "\t--> Token: " + XML_lexerConstants.tokenImage[myToken.kind]);
+      } catch (TokenMgrError e) {
+        System.out.println("Error léxico: " + e.getMessage());
+        if (option == 1) lexer.ReInit(System.in);
+        else if (option == 2) lexer.getNextToken();
+      }
+    }
+  }
+
+}
+PARSER_END(XML_lexer)
+
+SKIP : {
+  " " | "\t" | "\r" | "\n" | "\uFEFF" | <"//" (~["\n", "\r"])*>
+  
+}
+
+TOKEN : {
+  //Tokens version, encoding, y sus respectivos posibles valores
+    < LBLCABECERA: ("<#xml+ " <VERSION> " " <ENCODING> " #>") >
+  | < VERSION : ("version=" <NUMEROV>) >
+  | < NUMEROV : "\"0.5\"" | "\"1.0\"" | "\"2.0\"" >
+  | < ENCODING: ("encoding=" <TIPO>) >
+  | < TIPO: "\"UTF-8\"" | "\"ISO-8859-1\"" >
+  | < ASIGANTURAS_OPEN: "<Asignaturas>">
+  | < ASIGANTURAS_CLOSE: "</Asignaturas>">
+  | < ALS_OPEN: "<ALS>" >
+  | < ALS_CLOSE: "</ALS>" >
+  | < PROFESOR_OPEN: "<Profesor>" >
+  | < PROFESOR_CLOSE: "</Profesor>" >
+  | < ALUMNOS_OPEN: "<Alumnos>" >
+  | < ALUMNOS_CLOSE: "</Alumnos>" >
+  | < ALUMNO_OPEN: "<Alumno>" >
+  | < ALUMNO_CLOSE: "</Alumno>" >
+  | < POO_OPEN: "<POO>" >
+  | < POO_CLOSE: "</POO>" >
+  //| < MAIL_OPEN: "<Mail>" >
+  //| < MAIL_CLOSE: "</Mail>" >
+  //| < NOMBRE_OPEN: "<Nombre>" >
+  //| < NOMBRE_CLOSE: "</Nombre>" >
+  | < MAIL_REDUCIDO: "<Mail:'" (["a"-"z", "A"-"Z", "0"-"9"]){1,20} "@" (["a"-"z", "A"-"Z", "0"-"9"]){1,20} "." (["a"-"z", "A"-"Z"]){2,3} "'/>">
+  | < NOMBRE_REDUCIDO: "<Nombre:'" ((["a"-"z", "A"-"Z"])+ (" ")*){1,3} "'/>" >
+| < MAIL: "<Mail>" (" ")* (["a"-"z", "A"-"Z", "0"-"9"]){1,20} "@" (["a"-"z", "A"-"Z", "0"-"9"]){1,20} "." (["a"-"z", "A"-"Z"]){2,3} (" ")* "</Mail>">
+  | < NOMBRE: "<Nombre>" ((["a"-"z", "A"-"Z", "0"-"9"])+ (" ")*){1,3} "</Nombre>" >
+  //| < RESUMEN_OPEN: "<Resumen>" >
+  //| < RESUMEN_CLOSE: "</Resumen>" >
+  //| < RESUMEN: ((["a"-"z", "A"-"Z"]) (" " (["a"-"z", "A"-"Z"]))*)+ >
+  | < PAI_OPEN: "<PAI>" >
+  | < PAI_CLOSE: "</PAI>" >
+  | < DOCTYPE: "<!DOCTYPE \""  ((["a"-"z", "A"-"Z"])+ ("_")* (["a"-"z", "A"-"Z"])*)+ ".dtd\">" >
+  | < COMENTARIO_OPEN: "<!--" >
+  | < COMENTARIO_CLOSE: "-->" >
+  | < COMENTARIO_MULTILINEA: (["a"-"z", "A"-"Z"] ( " " | "\t" | "\n" | "." | "," | "\"<!--\"" | "\"-->\"")*)+ >
+}
+//Estados para diferenciar comentario de resumen
+
+<DEFAULT> TOKEN : {
+    < RESUMEN_OPEN: "<Resumen>" > : RESUMEN_STATE
+}
+
+<RESUMEN_STATE> TOKEN : {
+    < RESUMEN_TEXTO: (~["<"])* > 
+|   < RESUMEN_CLOSE: "</Resumen>" > : DEFAULT
+}
+

@@ -1,0 +1,39 @@
+﻿<#xml+ version="1.0" encoding="UTF-8" #>
+<!DOCTYPE "Mensaje_tipo.dtd">
+<Asignaturas>
+	<ALS>
+		<Profesor>
+			<Nombre>Nombre del profesor</Nombre>
+			<Mail> profesor@usj.es </Mail>
+		</Profesor>
+		<Alumnos>
+			<Alumno>
+				<Nombre>Nombre del alumno1</Nombre>
+				<Mail> alumno1@hotmail.com </Mail>
+			</Alumno>
+			<Alumno>
+				<Nombre>Nombre del alumno2</Nombre>
+				<Mail> alumno2@usj.es </Mail>
+			</Alumno>
+		</Alumnos>
+		<Resumen>
+			Descripcion de la asignatura
+		</Resumen>
+	</ALS>
+	<PAI>
+		<Profesor>
+			<Nombre>Nombre del profesor</Nombre>
+			<Mail> profesor@usj.es </Mail>
+		</Profesor>
+		<Alumnos>
+			<Alumno>
+				<Nombre>Nombre del alumno1</Nombre>
+				<Mail>alumno1@yahoo.es</Mail>
+			</Alumno>
+		</Alumnos>
+		<Resumen>
+			Descripcion de la asignatura
+		</Resumen>
+     </PAI>
+</Asignaturas>
+
